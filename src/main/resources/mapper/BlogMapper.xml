@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxi.blog.mapper.BlogMapper">
+
+    <select id="selectRecommand" resultType="Blog">
+       select * from t_blog where recommend =true order by update_time desc limit #{pageSize}
+    </select>
+    <select id="selectYearList" resultType="java.lang.String">
+      select DATE_FORMAT(create_time,'%Y') as `year` from t_blog group by DATE_FORMAT(create_time,'%Y') desc
+    </select>
+    <select id="selectBlogByYear" resultType="com.moxi.blog.entity.Blog">
+         select * from t_blog where DATE_FORMAT(create_time,'%Y')= #{year}
+    </select>
+</mapper>

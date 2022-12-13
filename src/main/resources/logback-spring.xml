@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+    <!--总结：
+     1.根据时间可以显示在控制台上和文件里。
+     2.设置路径和名称，设置三种（控制台，文件错误，文件信息）的记录格式和级别，在不同的开发环境中引用
+     3. 如果只在控制台显示，不需要配置文件。如果显示在文件的同时，也要显示在控制台，需要自己写一个控制台的部分-->
+
+<!--    <property name="logdir" value="logback.logdir"/>-->
+<!--    <property name="appname" value="logback.app"/>-->
+    <springProperty scope="context" name="logback.appname" source="logback.appname"/>
+    <springProperty scope="context" name="logback.logdir" source="logback.logdir"/>
+    <contextName>${logback.appname}</contextName>
+
+    <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
+        <!--展示格式 layout-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d -1 %contextName %msg%n</pattern>
+        </layout>
+<!--        ThresholdFilter为系统定义的拦截器，例如我们用ThresholdFilter来过滤掉ERROR级别以下的日志不输出到文件中-->
+<!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+<!--            <level>ERROR</level>-->
+<!--        </filter>-->
+    </appender>
+
+
+    <appender name="fileInfoLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--如果只是想要 Info 级别的日志，只是过滤 info 还是会输出 Error 日志，因为 Error 的级别高，
+        所以我们使用下面的策略，可以避免输出 Error 的日志-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!--过滤 Error-->
+            <level>ERROR</level>
+            <!--匹配到就禁止-->
+            <onMatch>DENY</onMatch>
+            <!--没有匹配到就允许-->
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
+        <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则
+            如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
+            的日志改名为今天的日期。即，<File> 的日志都是当天的。
+        -->
+        <File>${logback.logdir}/info.${logback.appname}.log</File>
+        <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
+            <FileNamePattern>${logback.logdir}/info.${logback.appname}.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <!--只保留最近90天的日志-->
+            <maxHistory>90</maxHistory>
+            <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+            <!--<totalSizeCap>1GB</totalSizeCap>-->
+        </rollingPolicy>
+        <!--日志输出编码格式化-->
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d [%thread] %-5level %logger{36} %line - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="fileErrorLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>Error</level>
+        </filter>
+        <File>${logback.logdir}/error.${logback.appname}.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${logback.logdir}/error.${logback.appname}.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d [%thread] %-5level %logger{36} %line - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 测试环境+开发环境. 多个使用逗号隔开. -->
+    <springProfile name="test,dev">
+        <!--<loger>用来设置某一个包或者具体的某一个类的日志打印级别-->
+        <logger name="com.moxi.blog" level="DEBUG" additivity="false">
+            <appender-ref ref="fileInfoLog"/>
+            <appender-ref ref="fileErrorLog"/>
+        </logger>
+    </springProfile>
+    <!--<springProfile name="dev">
+        &lt;!&ndash;<loger>用来设置某一个包或者具体的某一个类的日志打印级别&ndash;&gt;
+        <logger name="com.moxi.blog" level="DEBUG" additivity="false">
+            <appender-ref ref="consoleLog"/>
+        </logger>
+    </springProfile>-->
+
+    <!-- 生产环境. -->
+    <springProfile name="prod">
+        <logger name="com.moxi.blog" level="INFO" additivity="false">
+            <appender-ref ref="consoleLog"/>
+        </logger>
+        <logger name="com.moxi.blog" level="DEBUG" additivity="false">
+            <appender-ref ref="fileInfoLog"/>
+            <appender-ref ref="fileErrorLog"/>
+        </logger>
+    </springProfile>
+
+
+    <root level="info">
+        <appender-ref ref="consoleLog" />
+    </root>
+</configuration>

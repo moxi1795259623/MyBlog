@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="_fragments :: head(~{::title})">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>归档</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/tocbot/tocbot.css" th:href="@{/lib/tocbot/tocbot.css}">
+    <link rel="stylesheet" href="../static/css/me.css" th:href="/css/me.css}">
+</head>
+
+<th:block th:replace="_fragments :: script">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+</th:block>
+
+<body>
+<nav th:replace="_fragments :: menu(4)" class="ui inverted attached segment m-padded-tb-border m-shadow-small">
+    <!-- 放到大容器中，使标题不要太靠边缘部分-->
+    <div class="ui container">
+        <div class="ui inverted secondary stackable menu">
+            <!-- 颜色teal header类型 item标记之后每个条目-->
+            <h2 class="ui teal header item">Blog</h2>
+            <!-- class和h2标签中的item相同 光标在a前面Ctrl+D复制  移动端的时候隐藏-->
+            <a href="#" class="m-item item m-mobile-hide"><i class="home icon"></i>首页</a>
+            <a href="#" class="m-item item m-mobile-hide"><i class="idea icon"></i>分类</a>
+            <a href="#" class="m-item item m-mobile-hide"><i class="tags icon"></i>标签</a>
+            <a href="#" class="m-item item m-mobile-hide"><i class="clone icon"></i>归档</a>
+            <a href="#" class="m-item item m-mobile-hide"><i class="info icon"></i>关于我</a>
+            <!--右侧搜索框 item和上面一样-->
+            <div class="right item">
+                <div class="ui icon input ">
+                    <input type="text" placeholder="Search..." style="margin-right: 4em">
+                    <!-- link使得搜索图标变成小手可以点击-->
+                    <i class="search link icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--移动端图标按钮  m-mobile-show电脑端时候隐藏  menu toggle类似id-->
+    <a href="#" class="ui black icon button m-top-right m-mobile-show  menu toggle">
+        <i class="sidebar icon"></i>
+    </a>
+</nav>
+
+
+<!--content中间部分-->
+<div class="m-container-small m-padded-tb-massive">
+    <!--1. 列表头部分-->
+    <div class="ui top attached segment">
+        <div class="ui middle aligned two column grid">
+            <div class="column">
+                <h3 class="ui teal header">归档</h3>
+            </div>
+            <div class="column right aligned">
+                共<h2 class="ui orange header m-inline-block m-text-thin " th:text="${blogCount}">114</h2>篇博客
+            </div>
+        </div>
+    </div>
+    <!--2. 年份-->
+    <th:block th:each="item : ${archiveBlogMap}">
+        <h2 class="ui center aligned header" th:text="${item.key}">2022</h2>
+        <!--3. menu-->
+        <div class="ui fluid vertical menu">
+            <a class="item" target="_blank" href="#" th:href="@{/blog/{id}(id=${blog.id})}"
+               th:each="blog : ${item.value}">
+                <span>
+                <!--小图标 必须用i-->
+                <i class="ui tiny teal circle icon" style="margin-right: 2em !important;"></i>
+                <span th:text="${blog.title}">刻意练习清单</span>
+                <div class="ui teal basic left pointing label m-padded-arounf-mini m-text-thin "
+                     th:text="${#temporals.format(blog.createTime,'MM月dd日')}">10月14日</div>
+               </span>
+                <!--右侧为原创标识-->
+                <div class="ui basic orange label" th:text="${blog.flag}">原创</div>
+            </a>
+        </div>
+    </th:block>
+</div>
+
+<br>
+<br>
+
+
+<footer th:replace="_fragments :: footer" class="ui inverted vertical segment m-padded-tb-massive m-container-footer">
+    <!-- 和顶部对齐，所以放入container  center aligned里面的内容居中-->
+    <div class="ui center aligned container ">
+        <!-- grid分列 白色显示 divided竖线划分 -->
+        <div class="ui inverted divided stackable grid ">
+            <!--3337分-->
+            <div class="three wide column">
+                <div class="ui link inverted list">
+                    <!-- rounded圆角二维码   宽度110px em变化太小了    -->
+                    <div class="item">
+                        <img src="../images/chat.png" class="ui rounded image"
+                             style="width: 110px">
+                    </div>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    最新博客</h4>
+                <!--                   里面是一个列表-->
+                <div class="ui link inverted list">
+                    <a href="#" class="item">用户故事</a>
+                    <a href="#" class="item">用户故事</a>
+                    <a href="#" class="item">用户故事</a>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    联系我</h4>
+                <div class="ui link inverted list m-text-spaced">
+                    <a href="#" class="item">Email:123123@qq.com</a>
+                    <a href="#" class="item">QQ:12313123</a>
+
+                </div>
+            </div>
+            <div class="seven wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    Moxi</h4>
+                <div class="ui link inverted list ">
+                    <a href="#" class="item m-opacity-min">人生获取不是我们期盼的那场宴会，但既然来了，就跟着起舞吧</a>
+                </div>
+            </div>
+        </div>
+        <!--            分割线-->
+        <div class="ui inverted section divider m-text-thin">
+            <br>
+            <br>
+            <p class="m-opacity-min ">巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉</p>
+        </div>
+    </div>
+</footer>
+
+
+</body>
+<script>
+    $('.menu.toggle').click(function () {
+        $('.m-item').toggleClass('m-mobile-hide')
+    });
+
+</script>
+
+</html>

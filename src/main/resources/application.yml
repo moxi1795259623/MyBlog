@@ -1,0 +1,36 @@
+spring:
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://120.78.64.199:3306/blog?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: WangYan98.
+    druid:
+      stat-view-servlet:  #提供监控信息展示的html页面
+        enabled: true
+        login-username: root
+        login-password: 123456
+      web-stat-filter:    # 用于采集web-jdbc关联监控的数据,请求次数，并发情况等
+        enabled: true
+        url-pattern: /*
+        # registrationBean.addInitParameter("exclusions", config.getExclusions() != null ? config.getExclusions() : "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*");
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+      filters: stat,wall #总配，filter详配
+      filter:
+        stat:  # sql
+          slow-sql-millis: 1000  # 超过1000ms的都是慢查询
+          log-slow-sql: true  # 记录慢查询的sql
+          enabled: true
+        wall: # 防火墙
+          enabled: true
+  thymeleaf:
+    mode: HMTL
+  messages:
+    encoding: GBK
+    basename: i18n/messages
+
+comment:
+  avatar: /images/avatar.png
+
+

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="admin/_fragments :: head(~{::title})">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>标签管理</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="../../static/css/me.css">
+</head>
+<th:block th:replace="admin/_fragments :: script">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+    <script src="../static/js/semantic.min.js" th:src="@{/js/semantic.min.js}"></script>
+</th:block>
+
+<body>
+
+<nav th:replace="admin/_fragments :: menu(3)" class="ui inverted attached segment m-padded-tb-border m-shadow-small">
+    <div class="ui container">
+        <div class="ui inverted secondary stackable menu">
+            <h2 class="ui teal header item">后台管理</h2>
+            <a href="#" class="active m-item item m-mobile-hide"><i class="home icon"></i>博客</a>
+            <a href="#" class="m-item item m-mobile-hide"><i class="idea icon"></i>分类</a>
+            <a href="#" class="m-item item m-mobile-hide"><i class="tags icon"></i>标签</a>
+            <div class="right menu m-mobile-hide">
+                <div class="ui dropdown item ">
+                    <div class="ui text">
+                        <img class="ui avatar image" src="../../images/22.png"></img>
+                        Moxi
+                    </div>
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <a href="#" class="item">注销</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="#" class="ui black icon button m-top-right m-mobile-show  menu toggle">
+        <i class="sidebar icon"></i>
+    </a>
+</nav>
+
+
+<!--二级导航-->
+<div class="ui attached pointing menu">
+    <div class="ui container">
+        <div class="ui right menu">
+            <a href="#" th:href="@{/api/v1/pri/admin/tag/addTag/input}" class="ui item">新增</a>
+            <a href="#" th:href="@{/api/v1/pri/admin/tag/pageList}" class="ui teal item active">列表</a>
+        </div>
+    </div>
+</div>
+
+
+<!--content中间部分-->
+<div class="m-container-small m-padded-tb-massive">
+    <div class="container">
+        <div class="ui success message" th:unless="${#strings.isEmpty(message)}">
+            <i class="close icon"></i>
+            <div class="header">提示：</div>
+            <p th:text="${message}">恭喜，操作成功！</p>
+        </div>
+        <!--表格列表-->
+        <table class="ui celled table">
+            <thead>
+            <th></th>
+            <th>标题</th>
+            <th>操作</th>
+            </thead>
+            <tbody>
+            <tr th:each="tag,iterStat : ${page.records}">
+                <td th:text="${iterStat.index + 1 + (page.current - 1) * page.size}">1</td>
+                <td th:text="${tag.name}">xx</td>
+                <td>
+                    <a href="#" th:href="@{/api/v1/pri/admin/tag/editTag/{id}/input(id=${tag.id})}"
+                       class="ui teal mini button">编辑</a>
+                    <a href="#" th:href="@{/api/v1/pri/admin/tag/deleteTag/{id}(id = ${tag.id})}"
+                       class="ui red mini button">删除</a>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <th colspan="6">
+                <div class="ui mini pagination menu" th:if="${page.total/page.size >1}">
+                    <a class="ui item" th:href="@{/api/v1/pri/admin/tag/pageList(current=${page.current}-1)}"
+                       th:if="${page.hasPrevious}">上一页</a>
+                    <div class="ui item" th:text="${page.current}"></div>
+                    <a class="ui item" th:href="@{/api/v1/pri/admin/tag/pageList(current=${page.current}+1)}"
+                       th:if="${page.hasNext}">下一页</a>
+                </div>
+                <a href="#" th:href="@{/api/v1/pri/admin/tag/addTag/input}"
+                   class="ui teal basic right floated button">新增</a>
+            </th>
+            </tfoot>
+        </table>
+    </div>
+
+</div>
+<br>
+<br>
+
+
+
+<footer th:replace="admin/_fragments :: footer"
+        class="ui inverted vertical segment m-padded-tb-massive m-container-footer">
+    <div class="ui center aligned container ">
+        <div class="ui inverted divided stackable grid ">
+            <div class="three wide column">
+                <div class="ui link inverted list">
+                    <div class="item">
+                        <img src="../../images/chat.png" class="ui rounded image"
+                             style="width: 110px">
+                    </div>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    最新博客</h4>
+                <div class="ui link inverted list">
+                    <a href="#" class="item">用户故事</a>
+                    <a href="#" class="item">用户故事</a>
+                    <a href="#" class="item">用户故事</a>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    联系我</h4>
+                <div class="ui link inverted list m-text-spaced">
+                    <a href="#" class="item">Email:123123@qq.com</a>
+                    <a href="#" class="item">QQ:12313123</a>
+
+                </div>
+            </div>
+            <div class="seven wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    Moxi</h4>
+                <div class="ui link inverted list ">
+                    <a href="#" class="item m-opacity-min">人生获取不是我们期盼的那场宴会，但既然来了，就跟着起舞吧</a>
+                </div>
+            </div>
+        </div>
+        <!--分割线-->
+        <div class="ui inverted section divider m-text-thin">
+            <br>
+            <br>
+            <p class="m-opacity-min ">巴拉巴拉巴拉巴拉巴拉巴拉</p>
+        </div>
+    </div>
+</footer>
+
+
+</body>
+<script>
+    $('.menu.toggle').click(function () {
+        $('.m-item').toggleClass('m-mobile-hide')
+    });
+
+    //注销
+    $('.ui.dropdown').dropdown();
+
+    //消息提示关闭
+    $('.message.close').on(
+        'click', function () {
+            $(this).closest('.message').transition('fade');
+        }
+    );
+
+</script>
+
+</html>

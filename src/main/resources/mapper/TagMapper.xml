@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moxi.blog.mapper.TagMapper">
+
+    <!--map[id:1, tagsId:list{2,3,4}]-->
+    <insert id="saveBlogTags" parameterType="java.util.HashMap">
+        INSERT INTO t_blog_tags (blog_id,tag_id) VALUES
+        <foreach collection="tagIds" item="item" separator=",">
+            (#{id},#{item})
+        </foreach>
+    </insert>
+
+    <delete id="deletebyBlogId">
+        delete from t_blog_tags where blog_id = #{blogId}
+    </delete>
+
+    <select id="getTags" resultType="java.lang.Integer">
+          select tag_id from t_blog_tags where blog_id =#{blogId}
+    </select>
+
+    <select id="selectByName" resultType="java.lang.Integer">
+        select count(*) from t_tag where
+        <if test="name !=null">
+            `name` = #{name}
+        </if>
+    </select>
+
+
+    <select id="selectOneTag" resultType="com.moxi.blog.entity.Tag">
+           select id , `name` from t_tag where id in
+             (select tag_id from t_blog_tags where blog_id = #{blogId})  limit 1
+    </select>
+
+    <select id="tagTop" resultType="com.moxi.blog.entity.Tag">
+        select id, `name` from t_tag where id in (select tag_id from (select * from t_blog_tags GROUP BY tag_id order by count(*) desc limit #{pageSize}) as t)
+    </select>
+    <select id="selectBlogCountByTagId" resultType="java.lang.Integer">
+        select count(*) from t_blog_tags where tag_id=#{tagId}
+    </select>
+    <select id="selectAllTag" resultType="com.moxi.blog.entity.Tag">
+        select id,`name` from t_tag where id in (select tag_id from t_blog_tags where blog_id = #{blogId})
+    </select>
+    <select id="selectBlogBlockVoByTypeId" resultType="java.lang.Integer">
+        select b.id from t_blog b where id in (select blog_id from t_blog_tags where tag_id =#{tagId})
+    </select>
+
+    <insert id="saveOneTag">
+         insert into t_tag(`name`) VALUES(#{tag.name,jdbcType=VARCHAR});
+    </insert>
+
+</mapper>

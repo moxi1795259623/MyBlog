@@ -1,0 +1,4 @@
+logback:
+  logdir: /log/spring/blog-dev  #自定义日志路径
+  appname: blog
+

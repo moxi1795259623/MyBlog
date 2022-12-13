@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.moxi.blog.mapper.BlogPageVoMapper">
+     <!--用注解替代了-->
+    <!--    <select id="selectBlogsByCondition" resultType="com.moxi.blog.vo.BlogPageVo">-->
+    <!--        select b.id as blog_id, b.title as blogTitle, b.update_time as updateTime,b.is_published as published, b.recommend ,t.id as type_id, t.`name` as typeName-->
+    <!--        from t_blog b left join t_type t on  b.type_id = t.id-->
+    <!--        <if test="ew.emptyOfWhere == false">-->
+    <!--            ${ew.customSqlSegment}-->
+    <!--        </if>-->
+    <!--    </select>-->
+
+    <select id="countBlogs" resultType="java.lang.Integer">
+        select count(*) from
+        (select b.id as blog_id, b.title as blogTitle, t.id as type_id, t.`name` as typeName
+        from t_blog b left join t_type t on b.type_id = t.id
+        <if test="ew.emptyOfWhere == false">
+            ${ew.customSqlSegment}
+        </if>
+        ) as t2
+    </select>
+
+    <!--测试用-->
+    <select id="selectBlogsByCondition1" resultType="com.moxi.blog.vo.BlogPageVo">
+        select b.id as blog_id, b.title, t.id as type_id, t.`name`
+        from t_blog b, t_type t where b.type_id = t.id
+        <where>
+            <if test="blogTitle != null and blogTitle !='' ">
+                and title = #{blogTitle}
+            </if>
+            <if test="typeId > 0">
+                and type_id = #{typeId}
+            </if>
+            <if test="isRecommend">
+                and recommend = #{isRecommend}
+            </if>
+        </where>
+    </select>
+
+
+
+    <sql id="base_blog_user_field">
+         b.id ,b.appreciation,b.share_statement,b.commentable  ,b.content,b.flag,b.create_time,b.title,b.description,b.first_picture,b.update_time,b.views,b.type_id, u.nick_name,u.avatar,
+         u.id as uid
+    </sql>
+    <resultMap id="block" type="com.moxi.blog.vo.BlogBlockVo">
+        <id column="id" property="blogId" jdbcType="INTEGER"></id>
+        <result column="title" property="blogTitle" jdbcType="VARCHAR"></result>
+        <result column="content" property="content" jdbcType="VARCHAR"></result>
+        <result column="description" property="description" jdbcType="VARCHAR"></result>
+        <result column="first_picture" property="firstPicture" jdbcType="VARCHAR"></result>
+        <result column="update_time" property="updateTime" jdbcType="DATE"></result>
+        <result column="create_time" property="createTime" jdbcType="DATE"></result>
+        <result column="views" property="views" jdbcType="VARCHAR"></result>
+        <result column="flag" property="flag" jdbcType="VARCHAR"></result>
+        <result column="appreciation" property="appreciation" jdbcType="INTEGER"></result>
+        <result column="share_statement" property="shareStatement" jdbcType="INTEGER"></result>
+        <result column="commentable" property="commentable" jdbcType="INTEGER"></result>
+        <association property="type" javaType="com.moxi.blog.entity.Type">
+            <id column="type_id" property="id" jdbcType="INTEGER"></id>
+            <result column="name" property="name" jdbcType="VARCHAR"></result>
+        </association>
+        <association property="user" javaType="com.moxi.blog.entity.User">
+            <id column="id" property="id" jdbcType="INTEGER"></id>
+            <result column="nick_name" property="nickName" jdbcType="VARCHAR"></result>
+            <result column="avatar" property="avatar" jdbcType="VARCHAR"></result>
+        </association>
+    </resultMap>
+    <select id="selectBlogInfo" resultMap="block">
+        select <include refid="base_blog_user_field"> </include> from t_blog b left join t_user u on b.user_id = u.id
+    </select>
+    <select id="countBlogInfo" resultType="java.lang.Integer">
+        select count(*) from (select <include refid="base_blog_user_field"> </include> from t_blog b left join t_user u on b.user_id = u.id) as t2
+    </select>
+
+    <select id="selectBlogsByFuzzy" resultMap="block">
+        select <include refid="base_blog_user_field"> </include>
+        from t_blog b ,t_user u where b.user_id = u.id
+        and(b.title like concat('%','${query}','%') or  b.content like concat('%','${query}','%'))
+    </select>
+    <select id="countBlogFuzzy" resultType="java.lang.Integer">
+        select count(*) from (
+            select <include refid="base_blog_user_field"> </include>
+            from t_blog b ,t_user u where b.user_id = u.id
+             and(b.title like concat('%','${query}','%') or  b.content like concat('%','${query}','%'))) as t2
+    </select>
+
+
+    <select id="selectBlogInfoById" resultMap="block">
+        select <include refid="base_blog_user_field"> </include> from t_blog b , t_user u where b.user_id = u.id and b.id=#{blogId}
+    </select>
+
+    <select id="selectPageBlogByTypeId" resultMap="block">
+        select <include refid="base_blog_user_field"> </include> from t_blog b , t_user u where b.user_id = u.id and b.type_id=#{typeId}
+    </select>
+    <select id="countBlogInfoyTypeId" resultType="java.lang.Integer">
+        select count(*) from (
+           select <include refid="base_blog_user_field"></include> from t_blog b , t_user u where b.user_id = u.id and b.type_id=#{typeId})
+            as t2
+    </select>
+
+    <!--这个标签对应的博客的数量-->
+    <select id="countBlogInfoyTagId" resultType="java.lang.Integer">
+          select count(*) from (
+            select b.id from t_blog b where id in (select blog_id from t_blog_tags where tag_id =#{tagId})
+          ) as t2
+    </select>
+
+
+</mapper>

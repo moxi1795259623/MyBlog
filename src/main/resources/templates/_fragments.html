@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <!--适配移动端-->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title th:replace="${title}">详情页面</title>
+    <!--1. semantic-ui  css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.2.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="../static/css/typo.css" th:href="@{/css/typo.css}">
+    <link rel="stylesheet" href="../static/css/animate.css" th:href="@{/css/animate.css}">
+    <link rel="stylesheet" href="../static/lib/prism/prism.css" th:href="@{/lib/prism/prism.css}">
+    <link rel="stylesheet" href="../static/lib/tocbot/tocbot.css" th:href="@{/lib/tocbot/tocbot.css}">
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+</head>
+<body>
+
+
+<nav th:fragment="menu(n)" class="ui inverted attached segment m-padded-tb-border m-shadow-small">
+    <!-- 放到大容器中，使标题不要太靠边缘部分-->
+    <div class="ui container">
+        <div class="ui inverted secondary stackable menu">
+            <!-- 颜色teal header类型 item标记之后每个条目-->
+            <h2 class="ui teal header item">Blog</h2>
+            <!-- class和h2标签中的item相同 光标在a前面Ctrl+D复制  移动端的时候隐藏-->
+            <a href="#" th:href="@{/}" class="m-item item m-mobile-hide" th:classappend="${n==1} ? 'active'"><i
+                    class="home icon"></i>首页</a>
+            <a href="#" th:href="@{/types/-1}" class="m-item item m-mobile-hide" th:classappend="${n==2} ? 'active'"><i
+                    class="idea icon"></i>分类</a>
+            <a href="#" th:href="@{/tags/-1}" class="m-item item m-mobile-hide" th:classappend="${n==3} ? 'active'"><i
+                    class="tags icon"></i>标签</a>
+            <a href="#" th:href="@{/archives}" class="m-item item m-mobile-hide" th:classappend="${n==4} ? 'active'"><i
+                    class="clone icon"></i>归档</a>
+            <a href="#" th:href="@{/about}" class="m-item item m-mobile-hide" th:classappend="${n==5} ? 'active'"><i
+                    class="info icon"></i>关于我</a>
+            <!--右侧搜索框 item和上面一样-->
+            <div class="right item m-mobile-hide">
+                <!--可以加transparent:透明-->
+                <form name="search" action="#" th:action="@{/search}" method="post" target="_blank">
+                    <div class="ui icon input ">
+                        <input type="text" name="query" placeholder="Search...." th:value="${query}">
+                        <i onclick="document.forms['search'].submit()" class="search link icon"></i>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--移动端图标按钮  m-mobile-show电脑端时候隐藏  menu toggle类似id-->
+    <a href="#" class="ui black icon button m-top-right m-mobile-show  menu toggle">
+        <i class="sidebar icon"></i>
+    </a>
+</nav>
+
+
+<footer th:fragment="footer" class="ui inverted vertical segment m-padded-tb-massive m-container-footer">
+    <!-- 和顶部对齐，所以放入container  center aligned里面的内容居中-->
+    <div class="ui center aligned container ">
+        <!-- grid分列 白色显示 divided竖线划分 -->
+        <div class="ui inverted divided stackable grid ">
+            <!--3337分-->
+            <div class="three wide column">
+                <div class="ui link inverted list">
+                    <!-- rounded圆角二维码   宽度110px em变化太小了    -->
+                    <div class="item">
+                        <img src="../static/images/chat.png" th:src="@{/images/chat.png}" class="ui rounded image"
+                             style="width: 110px">
+                    </div>
+                </div>
+            </div>
+            <div class="three wide column" th:fragment="footBlogList">
+                <div id="blog-container">
+                    <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                        最新博客</h4>
+                    <!-- 里面是一个列表-->
+                    <div class="ui link inverted list">
+                        <a href="#" th:href="@{/blog/{id}(id=${blog.id})}" target="_blank" class="item"
+                           th:each="blog: ${newBlogList}" th:text="${blog.title}">用户故事</a>
+                    </div>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    联系我</h4>
+                <div class="ui link inverted list m-text-spaced">
+                    <a href="#" th:href="@{/about}" class="item" th:text="#{index.email}">Email:123123@qq.com</a>
+                    <a href="#" th:href="@{/about}" class="item">QQ:12313123</a>
+
+                </div>
+            </div>
+            <div class="seven wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    Moxi</h4>
+                <div class="ui link inverted list ">
+                    <a href="#" th:href="@{/about}" class="item m-opacity-min" th:text="#{index.content}">人生或许不是我们期盼的那场宴会，但既然来了，就跟着起舞吧</a>
+                </div>
+            </div>
+        </div>
+        <!--分割线-->
+        <div class="ui inverted section divider m-text-thin">
+            <p class="m-opacity-min ">Copyright © 2022 - <span th:text="${#dates.year(#dates.createNow())}">2022</span>
+                CodeSleep Designed by Moxi</p>
+        </div>
+        <div>
+            <span id="runtime_span"></span>
+            <script type="text/javascript">function show_runtime() {
+                window.setTimeout("show_runtime()", 1000);
+                X = new Date("12/12/2022 21:00:00");
+                Y = new Date();
+                T = (Y.getTime() - X.getTime());
+                M = 24 * 60 * 60 * 1000;
+                a = T / M;
+                A = Math.floor(a);
+                b = (a - A) * 24;
+                B = Math.floor(b);
+                c = (b - B) * 60;
+                C = Math.floor((b - B) * 60);
+                D = Math.floor((c - C) * 60);
+                runtime_span.innerHTML = "本站已运行" + A + "天" + B + "小时" + C + "分" + D + "秒"
+            }
+            show_runtime();</script>
+        </div>
+    </div>
+
+</footer>
+
+
+<th:block th:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery.scrollto@2.1.3/jquery.scrollTo.min.js"></script>
+    <script src="../lib/prism/prism.js" th:src="@{/lib/prism/prism.js}"></script>
+    <script src="../lib/tocbot/tocbot.min.js" th:src="@{/lib/tocbot/tocbot.min.js}"></script>
+    <script src="../lib/qrcode/qrcode.min.js" th:src="@{/lib/qrcode/qrcode.min.js}"></script>
+    <script>
+        $(function () {
+            $('#blog-container').load(/*[[@{/footer/footBlogList}]]*/"/footer/footBlogList")
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

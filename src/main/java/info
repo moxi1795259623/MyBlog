@@ -1,0 +1,181 @@
+有待验证：
+2022.11.27
+（一） @RequestBody部分
+1. @RequestBody: 读体为主，将体中的数据绑定到-》对象--》controlel的参数部分
+            (1)读取Request请求的body部分数据，使用系统默认配置的HttpMessageConverter进行解析
+            (2)get方式也可以设置body 【raw-json】，通过该注解也能读取（可能是看作json字符串了）
+            (3)根据Header->Content-type判断：
+                  (1) application/x-www-form-urlencoded，可选（即非必须，因为这种情况的数据@RequestParam, @ModelAttribute也可以处理，当然@RequestBody也能处理）；
+                  (2) application/json, application/xml等。这些格式的数据，必须使用@RequestBody来处理
+
+2. https://blog.csdn.net/cnds123321/article/details/118184858
+这篇文章：
+遇到的错误：Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+他给出的原因: 前端请求传Json对象的字符串则后端才使用@RequestBody。而我前端采用的表单提交的数据，是不能采用@RequestBody注解的
+他的解决方案：（1）去掉@RequestBody  (2)ajax请求，转换成json字符串（JSON.stringify(data)），并设置Content-type【JQuery 和 QWrap 的 Ajax，Content-Type 默认值都是「application/x-www-form-urlencoded;charset=utf-8」】
+
+分析：https://blog.csdn.net/feiyst/article/details/88431621
+我报这个错误的原因是：浏览器的Content-type = application/x-www-form-urlencoded(正常可以处理), (但是！)采用表单提交的数据post【可以看到enctype都不支持application/json类型的，更别提接收了】
+【application/x-www-form-urlencoded这应该是最常见的 POST 提交数据的方式了。浏览器的原生 form 表单，如果不设置 enctype 属性，那么最终就会以 application/x-www-form-urlencoded 方式提交数据。】
+而且@RequestParam可以处理get方式中queryString的值，也可以处理post方式中 body data的值（将其视为参数）
+
+3. 前端请求传Json对象则后端使用@RequestParam
+   前端请求传【Json对象的字符串】则后端使用@RequestBody
+
+（二） postman部分： https://blog.csdn.net/wangjun5159/article/details/47781443
+1. postman测试时 ：raw 和 application/x-www-form-urlencoded 如何选用和区别？？？
+参考这篇文章后，我发现了application/x-www-form-urlencoded都是键值对的方式，所以后端适合用@RequestParam接收，而raw可以选用json格式，适合@RequestBody接收
+
+(三)application/json 四种常见的 POST 提交数据方式
+https://blog.csdn.net/tycoon1988/article/details/40080691
+application/json 这个 Content-Type。现在越来越多的人把它作为请求头，用来告诉服务端消息主体是序列化后的 【JSON 字符串】
+
+
+结论：https://blog.csdn.net/justry_deng/article/details/80972817
+看过这篇收获到了很多细节的东西。我的问题也解决了：对应这一条：@RequestBody接收请求体中的json数据；不加注解接收URL中的数据并组装为对象：
+（1）最开始的时候：post表单提交 + application/x-www-form-urlencoded ，后端无@RequestBody ，运行没问题。
+因为application/x-www-form-urlencoded的编码格式是将表单数据的key,value拼接。postman中可以看到：name=zs&age=123,（类似在Post的url后拼接的效果，只不过是一个整体的字符串）。OK
+ (2) 之后：post表单提交 + application/x-www-form-urlencoded ，后端@RequestBody接收。报错Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
+因为@RequestBody无法取到体中的值。ok
+（3）但是，post表单提交 + application/x-www-form-urlencoded + @RequestBody String typeContent OK。。。难道它又放到体里面了？
+  --》 https://blog.csdn.net/weixin_51614089/article/details/117067441
+
+天呐，混沌中透露着清澈~
+
+2022.11.28
+1. BindingResult一直无法获得异常，所以改成了全局处理
+后来晓得了：不是依赖版本或者类型的问题。@Validated 与BindingResult 需要相邻，否则 变量result 不能接受错误信息，改过后解决问题
+2. spring-validation支持了分组校验的功能：groups Save.class  + @Validated(Type.Save.class)
+3. 自定义校验 : 自定义注解EncrytId + 校验规则EncryptIdValidator ->标注注解@EncrytId
+4. restful风格修改delete【有待增加一个删除提示框】
+5. 更新或者删除前先查询一下比较安全
+
+2022.11.30
+1. 增加一个显示当前页码的框，自定义分页标号 ok
+2. 新增的时候响应时间过长，如何排查
+(1) 思路：（https://blog.csdn.net/dream_na/article/details/122502804） ok
+    打开F12，刷新页面，查看静态资源加载情况 + 找到对应日志，找到具体是哪个步骤耗时过长
+(2) 学会F12定位资源和解决方案 【压缩 + 缓存浏览器 + CDN + CMS 待学习】
+原因找到：https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic&subset=latin（这个页面是senamtic.min.css请求的）上了，这是谷歌字体，服务器在外国，请求半天最终结果是无法访问
+解决办法：
+    -> 将字体下载到本地，将senamtic.min.css也下载到本地替换。对应senamtic.min.css的12行 【css无法识别。。。】
+    -> 需要的是rebuild project !! rebuild..   个别标识符不显示了。。
+    -> https://blog.csdn.net/deng_xj/article/details/88544617 额外引入了字体
+(3) log.info内容记录到日志,可以查询时间 ok
+3. BeanUtils 中封装了属性的赋值的方法
+
+2022.12.1
+1. 分页完成：两种方式
+(1) 动态sql 练习sql标签 ok(where+if)
+(2) 封装的方法 ok
+2. pageVo有什么区别，什么场景下用【待完成】
+3. 增加以下复杂度：ok
+(1)入参：BlogPageVo[type.name, blog(title,isRecommand)],current
+(2)两种方式分页查询，分页的实体类为BlogPageVo (type.id, type.name, blog.id, blog.title, blog.isRecommand)
+(3)blogPage分页对象，放入model中返回
+(4)postman请求：通过JsonData的方式查看结果数据
+4. 方式3的注意事项：ok
+(1)ok java bean 慎用 is开头isXxx开头的属性，若必须得用，那么一定要记得 idea自动生成的 setter 和 getter会不标准，
+从而会引起问题，他自动生成后，需要手工再次进行修改，才可使用，要不然有可能引起各种问题[添加this,修改方法名]
+(2)ok 前端传人员状态是Boolean 数据库存0或者1 --> Mybatis类型转换器Boolean转int(继承这个BaseTypeHandler类)
+(3)ok mybatis-plus 通过QueryWrapper进行+ sql语句结合-》【组合条件多表】查询 （非常棒！！）
+(4)ok SpringBoot集成MyBatis的分页插件PageHelper[三步https://cloud.tencent.com/developer/article/1028864]
+引入依赖-》@Bean配置插件和属性赋值-》使用
+(5)参数接收不到（映射不全）。 sql 字段后面起别名，和属性名相同
+5. @EqualsAndHashCode [https://zhuanlan.zhihu.com/p/339346376]
+@Data中的@EqualsAndHashCode默认为false,比较equals和hashcode时只用子类的属性，可以手动加上@EqualsAndHashCode(x=true),优先用父类的equals和hashcode判等
+6. 自己测试接口 ok
+(1)访问：接口路径要注意。get请求可以写路径变量+ json数据，后端@RequestBody接收 @ResponseBody响应
+(2)返回: @ResponseBody响应可以绕过视图解析器【待看源码】，向页面输出，格式取决于content-type
+7. 测试底层数据库 ok
+test方法，条件+分页 逐步添加功能
+8. 页面组合条件用ajax可以局部刷新，避免重新渲染后把查询条件覆盖掉
+9. 实体类名称前后要统一
+
+今日总结：
+动态sql
+MyBatis的分页插件PageHelper
+组合条件多表查询
+test+postman测试
+@EqualsAndHashCode
+参数接收不到（映射不全）
+pageVo的使用
+类型处理器BaseTypeHandler
+
+
+2022.12.2
+1. 遇到了pageHelper和mybatis-plus里jqlparser冲突的问题，很莫名其妙
+2. 数据库日期的格式化:  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @JsonFormat mysql函数 都处理不了【待解决】
+
+
+2022.12.3
+1. tags 数据表中不需要（添加一些数据库表中不存在的字段） @Transient 或者 @TableField(exist = false)ok
+2. 文本区域：数据库修改为longtext 或者某个组合注解忘记了 ok
+3. 登录密码加密 ok
+4. redis 【什么用】
+5. springboot的类型转换器没有作用吗 后端Integer->boolean 前端传的string就可以了 有点玄学 ok
+6. springboot的mybatis-plus启动突然变慢 -》去除多余断点 ok
+7. xx.load() 传参方式是 post 方式 ok
+8. is_published 无法接收-->BlogPageVo implements Serializable序列化后@JsonProperty （原因：springboot在进行序列化和反序列时对字段进行了处理）\ 或者全部置为小写 ok
+9. 前端状态发布/保存状态设置有问题  -> 后端和数据库注意名称@TableField 后端和前端注意大小写 ok
+10. 读取是否推荐的值有问题 ->弱智问题 sql忘记读取了 ok
+11. 尝试一下@Select注解版 ok
+12. 降序返回:blogQueryWrapper.orderByAsc("update_time") ok
+13. 添加清除按钮:ok
+
+今天感觉学习了些东西，但是很多都不懂原理，就像蒙了一层纱
+2022.12.5
+1. 遍历插入sql (blogId,tagIds)一对多。多个参数的时候使用map,根据key获取值，<foreach>遍历输出 ok
+2. mybatis只要extends BaseMapper就可以调用他的insert方法,id 会自动映射回来 ok
+3. mybatis 返回值是List<Integer>时，resultType="java.lang.Integer" ok
+4. tagMapper.deleteByMap()条件删除 ok
+5. java.lang.NoSuchMethodError mybatis-plus和mybatis插件的pagehelper 对应的jsqlparser冲突问题 ok【这个解决的很棒！】版本问题 循环引用
+
+2022.12.6
+1. 子查询里面不能直接写分页（limit）ok 再嵌套一层子循环 ok
+https://www.cnblogs.com/zhuyeshen/p/11592609.html#:~:text=This%20version%20of%20MySQL%20doesn%27t%20yet%20support%20%27LIMIT,LIMIT%20%E5%AD%90%E5%8F%A5%E7%9A%84%20IN%2FALL%2FANY%2FSOME%20%E5%AD%90%E6%9F%A5%E8%AF%A2%EF%BC%8C%E5%8D%B3%E6%98%AF%E6%94%AF%E6%8C%81%E9%9D%9E%20IN%2FALL%2FANY%2FSOME%20%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%20LIMIT%20%E5%AD%90%E6%9F%A5%E8%AF%A2%E3%80%82
+2. mybatis-plus返回多参数,多结果集，暂时没有比较好的办法，单结果可以用map ,其余多次遍历查询把 ok
+3. resultMap建立映射[可以满足名称和类型的映射，同时用于单表association和多表关联查询] ok 【很棒】
+如果出现查询结果不分页 或者 id 映射不上--》检查id标签
+4. map根据value排序（正反）
+5. 经常build一下 [快捷键Ctrl+Fn+F9]
+6. Duplicate column name 'id' ->子表id起别名as ok
+7. 新学会了一个分组的方法，很方便：【学一学流这里】Ok
+Map<Integer, List<Blog>> collect = blogs.stream().collect(Collectors.groupingBy(Blog::getTypeId));
+
+总结：多思考流程，需要的参数，打算怎么实现，不要手走在大脑前
+
+2022.12.7
+1. 发现：执行的分页查询，此时执行对应xml中配置的select查询语句时会先执行一个select count ...(你配置的表及条件),若有数据就会再执行一次select ...（你配置的列、表以及条件） limit ..
+2. 模糊查询：https://blog.csdn.net/Adobe_java/article/details/118460709  ok ->concat函数很不错
+3. 需要分页的sql语句后面不要加分号，因为之后会自动拼接limit  ok
+4. 我可太聪明了 嘿嘿 在get里调用post就可以解决get,post方式共用方法体了嘛 ok
+
+2022.12.8
+1. 见到一个新东西：Cache Hit Ratio [SQL_CACHE]: 0.6666666666666666 缓存生效
+今天很顺利
+
+2022.12.9
+1. 评论的提交和回复  ok
+遇到的问题thyeleaf与后端LocalDateTime类型的转换，方案https://blog.csdn.net/weixin_42031557/article/details/106937358
+2. mybatis-plus 的条件查询提供了orderByAsc方法
+
+
+2022.12.10
+1. 前端返回的类型列表顺序与取值顺序不一致-->LinkedHashMap
+2. 数据查询的时候，mysql查询的数目和mybatis不一致->resultMap写错  https://blog.csdn.net/qq_43055292/article/details/103188876
+
+2022.12.12
+1. 前端日期格式化 https://www.jianshu.com/p/a0c5f7224731
+2. 国际化一直不生效，rebuild 重启都不管用，最后自己好了。。。。。。无语
+3. 国际化乱码，百度都给的是改成UTF-8,但是我改成GBK好了
+
+部署时候遇到的一些问题
+1. 安全组端口没开放
+2. tomcat header缓冲不够 -》修改yml
+3. 默认只允许本机和root访问 修改为%
+4. lsof -i :8088
+   sudo kill -9 xx
+
+之后： 申请域名moxiblog.cn，调整xshell断网不停止程序https://blog.csdn.net/weixin_41519463/article/details/89963166
+修改数据库密码 上传github

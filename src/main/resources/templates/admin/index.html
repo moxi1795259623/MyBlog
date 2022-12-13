@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="admin/_fragments :: head(~{::title})">
+    <meta charset="UTF-8">
+    <!--适配移动端-->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>博客</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="../../static/css/me.css">
+</head>
+<th:block th:replace="admin/_fragments :: script">
+</th:block>
+
+<body>
+<!--导航栏  inverted黑色圆角  attached去掉圆角 m-padding-tb-border自定义样式引入-->
+<nav th:replace="admin/_fragments :: menu(1)" class="ui inverted attached segment m-padded-tb-border m-shadow-small">
+    <!-- 放到大容器中，使标题不要太靠边缘部分-->
+    <div class="ui container">
+        <div class="ui inverted secondary stackable menu">
+            <!-- 颜色teal header类型 item标记之后每个条目-->
+            <h2 class="ui teal header item">Blog</h2>
+            <a href="#" th:href="@{/api/v1/pri/admin/blog/blogList}" class="m-item item m-mobile-hide" th:classappend="${n==1} ? 'active'"><i class="idea icon"></i>博客</a>
+            <a href="#" th:href="@{/api/v1/pri/admin/type/pageList}" class="m-item item m-mobile-hide" th:classappend="${n==2} ? 'active'"><i class="tags icon"></i>分类</a>
+            <a href="#" th:href="@{/api/v1/pri/admin/tag/pageList}"  class="m-item item m-mobile-hide" th:classappend="${n==3} ? 'active'"><i class="clone icon"></i>标签</a>
+            <!--右侧显示登录用户和头像 这里用right menu的方式 相当于子菜单-->
+            <div class="right menu m-mobile-hide">
+                <div class="ui dropdown item ">
+                    <!--头像 姓名放到一个text里-->
+                    <div class="ui text">
+                        <img class="ui avatar image" src="../../static/images/22.png"></img>
+                        Moxi
+                    </div>
+                    <!--下拉图标-->
+                    <i class="dropdown icon"></i>
+                    <!--下拉图标中这里只做了注销-->
+                    <div class="menu">
+                        <a href="#" class="item" th:href="@{/api/v1/pri/admin/logout}">注销</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--移动端图标按钮  m-mobile-show电脑端时候隐藏  menu toggle类似id-->
+    <a href="#" class="ui black icon button m-top-right m-mobile-show  menu toggle">
+        <i class="sidebar icon"></i>
+    </a>
+</nav>
+
+
+<br>
+<br>
+<!--container可以自适应屏幕大小的显示-->
+<div class="ui container m-padded-tb-massive " style="max-width: 50em !important;">
+    <div class="ui success message">
+        <h2>Hi</h2>
+        <p>Moxi,欢迎登录！</p>
+    </div>
+    <img src="../../static/images/22.png" th:src="@{/images/22.png}" class="ui rounded fluid image">
+
+</div>
+<br>
+<br>
+
+
+<!--vertical圆角变直角  m-padded-tb-massive自定义边角的padding-->
+<footer th:replace="admin/_fragments :: footer"
+        class="ui inverted vertical segment m-padded-tb-massive m-container-footer">
+    <!-- 和顶部对齐，所以放入container  center aligned里面的内容居中-->
+    <div class="ui center aligned container ">
+        <!-- grid分列 白色显示 divided竖线划分 -->
+        <div class="ui inverted divided stackable grid ">
+            <!--3337分-->
+            <div class="three wide column">
+                <div class="ui link inverted list">
+                    <!-- rounded圆角二维码   宽度110px em变化太小了    -->
+                    <div class="item">
+                        <img src="../../static/images/chat.png" th:src="@{/images/chat.png}" class="ui rounded image"
+                             style="width: 110px">
+                    </div>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    最新博客</h4>
+                <!--                   里面是一个列表-->
+                <div class="ui link inverted list">
+                    <a href="#" class="item">用户故事</a>
+                    <a href="#" class="item">用户故事</a>
+                    <a href="#" class="item">用户故事</a>
+                </div>
+            </div>
+            <div class="three wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    联系我</h4>
+                <div class="ui link inverted list m-text-spaced">
+                    <a href="#" class="item">Email:123123@qq.com</a>
+                    <a href="#" class="item">QQ:12313123</a>
+
+                </div>
+            </div>
+            <div class="seven wide column">
+                <h4 class="ui inverted header m-text-thin m-text-spaced m-text-lined m-opacity-min">
+                    Moxi</h4>
+                <div class="ui link inverted list ">
+                    <a href="#" class="item m-opacity-min">人生获取不是我们期盼的那场宴会，但既然来了，就跟着起舞吧</a>
+                </div>
+            </div>
+        </div>
+        <!--            分割线-->
+        <div class="ui inverted section divider m-text-thin">
+            <br>
+            <br>
+            <p class="m-opacity-min ">巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉</p>
+        </div>
+    </div>
+</footer>
+
+
+</body>
+<script>
+    $('.menu.toggle').click(function () {
+        $('.m-item').toggleClass('m-mobile-hide')
+    });
+    //注销
+    $('.ui.dropdown').dropdown();
+</script>
+
+</html>
